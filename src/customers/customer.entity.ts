@@ -7,7 +7,13 @@ export class Customer {
     id: string;
 
     @Column()
-    name: string;
+    firstName: string;
+
+    @Column()
+    middleName: string;
+
+    @Column({ nullable: true })
+    lastName: string;
 
     @Column()
     phone: string;

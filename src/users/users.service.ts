@@ -21,12 +21,14 @@ export class UsersService {
     async createCustomer(
         email: string,
         password: string,
-        name: string,
+        firstName: string,
+        middleName: string,
         phone: string,
         address: string,
         city: string,
         region: string,
-        imageUrl?: string
+        imageUrl?: string,
+        lastName?: string,
     ){
         const exisiting = await this.usersRepository.findOne({ where: { email } });
         if(exisiting) throw new ConflictException('Email already in Use');
@@ -35,7 +37,7 @@ export class UsersService {
         // Create the user and customer records in a transaction
         const user = this.usersRepository.create({ email, password: hashedPassword, role: UserRole.CUSTOMER });
         const savedUser = await this.usersRepository.save(user);
-        const customer = this.customersRepository.create({ name, phone, address, city, region, imageUrl, user: savedUser });
+        const customer = this.customersRepository.create({ firstName, middleName, lastName, phone, address, city, region, imageUrl, user: savedUser });
         await this.customersRepository.save(customer);
         const { password: _, ...result } = savedUser;
         // Exclude the password from the returned result
