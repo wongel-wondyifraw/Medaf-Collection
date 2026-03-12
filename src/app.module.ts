@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 // Entities
 import { User } from './users/user.entity';
 import { Customer } from './customers/customer.entity';
+import {Category} from './categories/category.entity';
+import {Product} from './products/entities/product.entity';
 
 // Modules
 import { UsersModule } from './users/users.module';
@@ -15,6 +17,7 @@ import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { CustomersModule } from './customers/customers.module';
 import { CategoriesModule } from './categories/categories.module';
+
 
 @Module({
   imports: [
@@ -29,7 +32,7 @@ import { CategoriesModule } from './categories/categories.module';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || 'postgres',
       database: process.env.DB_NAME || 'ministore',
-      entities: [User, Customer],  // ← register all entities here
+      entities: [User, Customer, Category , Product],  // ← register all entities here
       synchronize: true,           // ← auto creates tables
     }),
 
