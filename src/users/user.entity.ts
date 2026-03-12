@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column , CreateDateColumn , UpdateDateColumn, OneToOne } from "typeorm";
+import { Entity, PrimaryColumn, Column , CreateDateColumn , UpdateDateColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import {Customer} from "../customers/customer.entity";
 
 export enum UserRole {
@@ -8,11 +8,17 @@ export enum UserRole {
 @Entity('users')
 export class User {
 
-    @PrimaryColumn('uuid')
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column({ unique: true })
     email: string;
+
+    @Column({nullable: true})
+    name: string;
+
+    @Column({nullable: true})
+    imageUrl: string;
 
     @Column()
     password: string;   
@@ -28,7 +34,7 @@ export class User {
     
     @CreateDateColumn()
     createdAt: Date;
-    
+
     @UpdateDateColumn()
     updatedAt: Date;
 }

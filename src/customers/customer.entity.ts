@@ -21,6 +21,9 @@ export class Customer {
     @Column()
     region: string;
 
+    @Column({ nullable: true })
+    imageUrl: string;
+
     @OneToOne(() => User, user => user.customer)
     @JoinColumn()
     user: User;
