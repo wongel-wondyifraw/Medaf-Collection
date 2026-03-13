@@ -9,6 +9,8 @@ import { User } from './users/user.entity';
 import { Customer } from './customers/customer.entity';
 import {Category} from './categories/category.entity';
 import {Product} from './products/entities/product.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
+import { Order } from './orders/entities/order.entity';
 
 // Modules
 import { UsersModule } from './users/users.module';
@@ -17,7 +19,7 @@ import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { CustomersModule } from './customers/customers.module';
 import { CategoriesModule } from './categories/categories.module';
-import { OrderItem } from './orders/entities/order-item.entity';
+
 
 
 @Module({
@@ -33,7 +35,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || 'postgres',
       database: process.env.DB_NAME || 'ministore',
-      entities: [User, Customer, Category , Product, OrderItem],  // ← register all entities here
+      entities: [User, Customer, Category , Product, OrderItem, Order],  // ← register all entities here
       synchronize: true,           // ← auto creates tables
     }),
 

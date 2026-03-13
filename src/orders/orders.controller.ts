@@ -1,34 +1,76 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { OrderStatus } from './entities/order.entity';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
 
+  constructor(private ordersService: OrdersService) {}
+
+  // ─── PLACE ORDER (Customer) ───────────────────────────────
+
+  // POST /orders — customer places an order
+  // req.user comes from JwtStrategy.validate()
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  @UseGuards(AuthGuard('jwt'))
+  create(
+    @Request() req,
+    @Body() dto: CreateOrderDto,
+  ) {
+    return this.ordersService.create(
+      req.user.id,   // ← userId from JWT token
+      dto.items,
+      dto.note,
+    );
   }
 
+  // ─── GET ALL ORDERS (Admin) ───────────────────────────────
+
+  // GET /orders — admin sees all orders
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   findAll() {
     return this.ordersService.findAll();
   }
 
+  // ─── GET MY ORDERS (Customer) ─────────────────────────────
+
+  // GET /orders/my — customer sees their own orders
+  @Get('my')
+  @UseGuards(AuthGuard('jwt'))
+  findMyOrders(@Request() req) {
+    return this.ordersService.findMyOrders(req.user.id);
+  }
+
+  // ─── GET SINGLE ORDER ─────────────────────────────────────
+
+  // GET /orders/:id
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
   findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+    return this.ordersService.findOne(id);  // ← string not +id
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
-  }
+  // ─── UPDATE ORDER STATUS (Admin) ──────────────────────────
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
+  // PATCH /orders/:id/status
+  @Patch(':id/status')
+  @UseGuards(AuthGuard('jwt'))
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: OrderStatus,
+  ) {
+    return this.ordersService.updateStatus(id, status);
   }
 }
