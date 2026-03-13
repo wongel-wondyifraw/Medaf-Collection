@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { Category } from '../categories/category.entity';
-import {OrderItem} from "../orders/order-item.entity";
+import { Category } from 'src/categories/category.entity';
+import {OrderItem} from 'src/orders/entities/order-item.entity';
 @Entity('products')
 export class Product {
     @PrimaryGeneratedColumn('uuid')
