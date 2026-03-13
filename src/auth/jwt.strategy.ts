@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
       // 7. Secret key used to verify the token signature
       //    must match the secret used to SIGN the token in AuthService
-      secretOrKey: 'secret',
+      secretOrKey: process.env.JWT_SECRET || 'secret',
     });
   }
 
