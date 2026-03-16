@@ -98,28 +98,26 @@ export class OrdersService {
 
   // ─── GET ALL ORDERS (Admin) ───────────────────────────────
 
-  async findAll() {
-    return this.ordersRepository.find({
-      relations: [
-        'user',           // who placed the order
-        'items',          // what was ordered
-        'items.product',  // product details
-      ],
-      order: { createdAt: 'DESC' }, // newest first
-    });
-  }
+async findAll(page: number = 1, limit: number = 20) {
+  return this.ordersRepository.find({
+    relations: ['user', 'items', 'items.product'],
+    order: { createdAt: 'DESC' },
+    skip: (page - 1) * limit,  // ← pagination
+    take: limit,                // ← pagination
+  });
+}
 
   // ─── GET MY ORDERS (Customer) ─────────────────────────────
 
-  async findMyOrders(userId: string) {
-    // 10. Customer can only see their own orders
-    return this.ordersRepository.find({
-      where: { user: { id: userId } },
-      relations: ['items', 'items.product'],
-      order: { createdAt: 'DESC' },
-    });
-  }
-
+  async findMyOrders(userId: string, page: number = 1, limit: number = 20) {
+  return this.ordersRepository.find({
+    where: { user: { id: userId } },
+    relations: ['items', 'items.product'],
+    order: { createdAt: 'DESC' },
+    skip: (page - 1) * limit,  // ← pagination
+    take: limit,                // ← pagination
+  });
+}
   // ─── GET SINGLE ORDER ─────────────────────────────────────
 
   async findOne(id: string) {
