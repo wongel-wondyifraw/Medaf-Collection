@@ -6,10 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: [
-      'http://localhost:3001',  // ← Next.js dev server
-      'http://localhost:3000',  // ← just in case
-    ],
+    origin: [/^http:\/\/localhost:\d+$/],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
   });
@@ -20,7 +17,25 @@ async function bootstrap() {
     transform: true,
   }));
 
-  // ← backend always runs on 3000
-  await app.listen(3001);
+  const basePort = Number(process.env.PORT || 3001);
+  const maxAttempts = 10;
+
+  let lastError: unknown;
+  for (let i = 0; i <= maxAttempts; i += 1) {
+    const port = basePort + i;
+    try {
+      await app.listen(port);
+      // eslint-disable-next-line no-console
+      console.log(`✅ Backend listening on http://localhost:${port}`);
+      return;
+    } catch (err: any) {
+      lastError = err;
+      if (err?.code !== 'EADDRINUSE') throw err;
+      // eslint-disable-next-line no-console
+      console.log(`Port ${port} in use, trying ${port + 1}...`);
+    }
+  }
+
+  throw lastError;
 }
 bootstrap();
