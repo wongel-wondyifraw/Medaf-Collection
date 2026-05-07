@@ -32,17 +32,44 @@ export class UsersService {
     ){
         const exisiting = await this.usersRepository.findOne({ where: { email } });
         if(exisiting) throw new ConflictException('Email already in Use');
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-        // Create the user and customer records in a transaction
-        const user = this.usersRepository.create({ email, password: hashedPassword, role: UserRole.CUSTOMER });
-        const savedUser = await this.usersRepository.save(user);
-        const customer = this.customersRepository.create({ firstName, middleName, lastName, phone, address, city, region, imageUrl, user: savedUser });
-        await this.customersRepository.save(customer);
-        const { password: _, ...result } = savedUser;
-        // Exclude the password from the returned result
-        return result;
-        // return savedUser;
+
+        return await this.usersRepository.manager.transaction(async (manager) => {
+            const customersRepo = manager.getRepository(Customer);
+            const usersRepo = manager.getRepository(User);
+
+            // 1) Create the customer first (all info needed for Customers page)
+            const customer = customersRepo.create({
+                firstName,
+                middleName,
+                lastName,
+                phone,
+                address,
+                city,
+                region,
+                imageUrl,
+            });
+            const savedCustomer = await customersRepo.save(customer);
+
+            // 2) Create the user and LINK via users.customerId
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const user = usersRepo.create({
+                email,
+                password: hashedPassword,
+                role: UserRole.CUSTOMER,
+                customerId: savedCustomer.id,
+                customer: savedCustomer,
+            });
+            const savedUser = await usersRepo.save(user);
+
+            // 3) Return user without password, including customer info
+            const withRelations = await usersRepo.findOne({
+                where: { id: savedUser.id },
+                relations: ['customer'],
+            });
+            const safeUser = withRelations || savedUser;
+            const { password: _, ...result } = safeUser as any;
+            return result;
+        });
     }
 
     // Find a user by email

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn , OneToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn , OneToOne } from "typeorm";
 import { User } from "../users/user.entity";
 
 @Entity('customers')
@@ -30,8 +30,9 @@ export class Customer {
     @Column({ nullable: true })
     imageUrl: string;
 
+    // Inverse side of the relation.
+    // The foreign key lives on the users table as users.customerId
     @OneToOne(() => User, user => user.customer)
-    @JoinColumn()
     user: User;
 
     @CreateDateColumn()

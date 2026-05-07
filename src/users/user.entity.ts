@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column , CreateDateColumn , UpdateDateColumn, OneToOne, PrimaryGeneratedColumn, Index } from "typeorm";
+import { Entity, Column , CreateDateColumn , UpdateDateColumn, OneToOne, PrimaryGeneratedColumn, Index, JoinColumn } from "typeorm";
 import {Customer} from "../customers/customer.entity";
 
 export enum UserRole {
@@ -30,7 +30,11 @@ export class User {
     @Column({default: true})
     isActive: boolean;
 
+    @Column({ type: "uuid", nullable: true })
+    customerId: string | null;
+
     @OneToOne(() => Customer, customer => customer.user, { nullable: true, eager: true })
+    @JoinColumn({ name: "customerId" })
     customer: Customer;
     
     @CreateDateColumn()
