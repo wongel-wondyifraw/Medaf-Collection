@@ -39,8 +39,9 @@ export class AuthService {
       dto.address,
       dto.city,
       dto.region,
+      dto.imageUrl, 
       dto.lastName,    // optional
-      dto.imageUrl,    // optional
+         // optional
     );
 
     // 9. Generate JWT token for the new user

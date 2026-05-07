@@ -13,6 +13,9 @@ import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from 'src/users/user.entity';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('categories')
 export class CategoriesController {
@@ -21,7 +24,8 @@ export class CategoriesController {
 
 //   Create a new category (protected route)
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   create(@Body() dto: CreateCategoryDto) {
     return this.categoriesService.create(
       dto.name,
@@ -44,7 +48,8 @@ export class CategoriesController {
 
 //   Update a category (protected route)
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt'))
+ @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
     return this.categoriesService.update(
       id,
@@ -58,7 +63,8 @@ export class CategoriesController {
 //   Delete a category (protected route)
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);
   }
