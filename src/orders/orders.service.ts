@@ -9,6 +9,7 @@ import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { Product } from '../products/entities/product.entity';
 import { User } from '../users/user.entity';
+import { Customer } from '../customers/customer.entity';
 
 @Injectable()
 export class OrdersService {
@@ -25,6 +26,9 @@ export class OrdersService {
 
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+
+    @InjectRepository(Customer)
+    private customersRepository: Repository<Customer>,
   ) {}
 
   // ─── CREATE ORDER ─────────────────────────────────────────
@@ -41,6 +45,25 @@ export class OrdersService {
       relations: ['customer'],  // load customer profile
     });
     if (!user) throw new NotFoundException('User not found');
+
+    // Backward compatibility:
+    // Some existing users were created before users.customerId linking.
+    // Try to recover legacy customer mapping from customers.userId and backfill.
+    if (!user.customer) {
+      const legacyCustomerRows = await this.customersRepository.query(
+        'SELECT * FROM customers WHERE "userId" = $1 LIMIT 1',
+        [userId],
+      );
+      if (Array.isArray(legacyCustomerRows) && legacyCustomerRows.length > 0) {
+        const legacyCustomerId = legacyCustomerRows[0].id as string;
+        user.customerId = legacyCustomerId;
+        await this.usersRepository.save(user);
+        user.customer = await this.customersRepository.findOne({
+          where: { id: legacyCustomerId },
+        });
+      }
+    }
+
     if (!user.customer) throw new BadRequestException('User has no customer profile');
 
     // 2. Validate all products and check stock
