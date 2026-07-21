@@ -19,6 +19,9 @@ import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { CustomersModule } from './customers/customers.module';
 import { CategoriesModule } from './categories/categories.module';
+import { SeedService } from './database/seed.service';
+import { DatabaseModule } from './database/database.module';
+
 
 
 
@@ -29,15 +32,16 @@ import { CategoriesModule } from './categories/categories.module';
 
     // 2. Database connection — THIS WAS MISSING
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASS || 'postgres',
-      database: process.env.DB_NAME || 'ministore',
-      entities: [User, Customer, Category , Product, OrderItem, Order],  // ← register all entities here
-      synchronize: true,           // ← auto creates tables
-    }),
+  type: 'postgres',
+  host: process.env.DB_HOST ?? 'localhost',
+  port: parseInt(process.env.DB_PORT ?? '5432'),
+  username: process.env.DB_USERNAME ?? 'postgres',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE ?? 'medaf',
+  entities: [User, Customer, Category, Product, OrderItem, Order],
+  synchronize: true,
+  
+}),
 
     UsersModule,
     AuthModule,
@@ -45,6 +49,7 @@ import { CategoriesModule } from './categories/categories.module';
     OrdersModule,
     CustomersModule,
     CategoriesModule,
+    DatabaseModule
   ],
   controllers: [AppController],
   providers: [AppService],
